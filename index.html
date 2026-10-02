@@ -14,11 +14,8 @@
       --card-border: #334155;
       --accent: #6366f1;
       --accent-hover: #4f46e5;
-      --accent-light: rgba(99, 102, 241, 0.15);
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --success: #10b981;
-      --warning: #f59e0b;
       --danger: #ef4444;
       --radius: 16px;
     }
@@ -298,17 +295,17 @@
     <div class="card promo-card">
       <div class="promo-tag">🌿 Чистая речь</div>
       <div class="promo-title">Окультуривай свой лексикон</div>
-      <div class="promo-desc">Введи любое ругательство или разговорное слово — AI подберет красивую литературную замену под каждую ситуацию.</div>
+      <div class="promo-desc">Введи любое разговорное слово или выражения — AI подберет красивую литературную замену под разные ситуативные контексты.</div>
     </div>
 
     <div class="search-box">
       <div class="input-wrapper">
-        <input type="text" class="search-input" id="search-input" placeholder="Введите ругательство..." autocomplete="off">
+        <input type="text" class="search-input" id="search-input" placeholder="Введите слово для анализа..." autocomplete="off">
       </div>
       <button class="submit-btn" id="search-btn">Перевести</button>
     </div>
 
-    <div class="loader" id="loader">✨ Подбираем ситуации и литературные выражения...</div>
+    <div class="loader" id="loader">✨ Анализируем контексты и подбираем литературные выражения...</div>
     <div class="error-msg" id="error-msg"></div>
 
     <div class="results-container" id="results-area" style="display: none;">
@@ -338,23 +335,27 @@
     const targetWordTitle = document.getElementById('target-word-title');
     const adviceBody = document.getElementById('advice-body');
 
-    async function fetchAiData(word) {
+    // Список моделей для цепочки запросов (если одна не ответит, подхватит другая)
+    const modelsToTry = ["mistral", "qwen", "openai"];
+
+    async function queryModel(word, modelName) {
       const url = "https://text.pollinations.ai/";
 
-      const promptText = `Ты филолог и лингвист. Твоя задача — проанализировать разговорное или грубое слово "${word}" и подобрать к нему корректные ЛИТЕРАТУРНЫЕ замены в зависимости от контекста.
+      const promptText = `Ты лингвист и эксперт по культуре речи. Проанализируй слово "${word}".
+Разбей варианты его литературной замены ПО РАЗНЫМ ТИПОВЫМ СИТУАЦИЯМ (контекстам) его использования.
 
-Верни ответ ТОЛЬКО в формате JSON (без использования markdown разметки вроде \`\`\`json):
+Формат ответа — СТРОГО JSON без markdown-разметки:
 {
   "word": "${word}",
-  "advice": "Совет по уместности использования литературной альтернативы вместо этого слова.",
+  "advice": "Короткий совет, чем лучше заменить эмоцию или смысл этого слова в литературной речи.",
   "situations": [
     {
-      "contextName": "Контекст или ситуация использования (например, О качестве вещей)",
-      "replacements": ["первая замена", "вторая замена", "третья замена"]
+      "contextName": "Название ситуации (например, О некачественных предметах/услугах)",
+      "replacements": ["первое выражение", "второе выражение", "третье выражение"]
     },
     {
-      "contextName": "Другой контекст (например, О человеческом поведении)",
-      "replacements": ["первая замена", "вторая замена"]
+      "contextName": "Название ситуации (например, О беспорядке или мусоре)",
+      "replacements": ["первое выражение", "второе выражение"]
     }
   ]
 }`;
@@ -363,30 +364,46 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [
-            { role: "user", content: promptText }
-          ],
-          model: "mistral",
-          seed: 42
+          messages: [{ role: "user", content: promptText }],
+          model: modelName,
+          seed: 100
         })
       });
 
-      if (!response.ok) {
-        throw new Error("Ошибка получения ответа: " + response.status);
-      }
+      if (!response.ok) throw new Error("HTTP Status " + response.status);
 
       const rawText = await response.text();
-      console.log("Raw Response:", rawText);
-
-      // Извлечение JSON из ответа
+      
+      // Вырезаем JSON из ответа (на случай, если ИИ добавил текст до/после)
       const jsonStart = rawText.indexOf('{');
       const jsonEnd = rawText.lastIndexOf('}');
+      
       if (jsonStart !== -1 && jsonEnd !== -1) {
         const jsonString = rawText.substring(jsonStart, jsonEnd + 1);
         return JSON.parse(jsonString);
       }
 
-      throw new Error("Не удалось обработать ответ от AI");
+      throw new Error("Не удалось извлечь JSON");
+    }
+
+    async function fetchAiDataWithFallback(word) {
+      let lastError = null;
+
+      // Перебираем модели по очереди
+      for (const model of modelsToTry) {
+        try {
+          console.log(`Пробуем модель: ${model}`);
+          const data = await queryModel(word, model);
+          if (data && data.situations && data.situations.length > 0) {
+            return data;
+          }
+        } catch (err) {
+          console.warn(`Модель ${model} не дала результат:`, err);
+          lastError = err;
+        }
+      }
+
+      throw lastError || new Error("Ни одна из моделей не вернула корректный ответ.");
     }
 
     async function handleSearch() {
@@ -399,11 +416,11 @@
       searchBtn.disabled = true;
 
       try {
-        const data = await fetchAiData(query);
+        const data = await fetchAiDataWithFallback(query);
         renderResults(data);
       } catch (err) {
-        console.error("Ошибка:", err);
-        errorMsg.textContent = "Произошла ошибка при загрузке или обработке данных. Попробуйте еще раз или введите другое слово.";
+        console.error("Финал ошибки:", err);
+        errorMsg.textContent = "Не удалось обработать слово. Попробуйте сформулировать иначе или проверить подключение.";
         errorMsg.style.display = 'block';
       } finally {
         loader.style.display = 'none';
@@ -413,11 +430,11 @@
 
     function renderResults(data) {
       targetWordTitle.textContent = data.word || searchInput.value.trim();
-      adviceBody.textContent = data.advice || "Замена разговорных и грубых слов литературными эквивалентами делает вашу речь четкой и выразительной.";
+      adviceBody.textContent = data.advice || "Замена грубой и разговорной лексики литературными выражениями расширяет словарный запас и повышает убедительность речи.";
 
       situationsList.innerHTML = '';
 
-      if (data.situations && Array.isArray(data.situations) && data.situations.length > 0) {
+      if (data.situations && Array.isArray(data.situations)) {
         data.situations.forEach(sit => {
           const sitCard = document.createElement('div');
           sitCard.className = 'situation-card';
@@ -435,14 +452,12 @@
           }
 
           sitCard.innerHTML = `
-            <div class="situation-title">📌 ${sit.contextName || 'Контекст'}</div>
+            <div class="situation-title">📌 ${sit.contextName || 'Ситуация'}</div>
             <div class="phrases-list">${phrasesHtml}</div>
           `;
 
           situationsList.appendChild(sitCard);
         });
-      } else {
-        situationsList.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem;">Не удалось извлечь варианты ситуаций. Попробуйте обновить запрос.</div>';
       }
 
       resultsArea.style.display = 'flex';
@@ -450,7 +465,7 @@
 
     function copyText(text) {
       navigator.clipboard.writeText(text);
-      alert(`Скопировано: "${text}"`);
+      alert(`Скопировано в буфер обмена: "${text}"`);
     }
 
     searchBtn.addEventListener('click', handleSearch);
