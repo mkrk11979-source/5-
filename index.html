@@ -346,9 +346,6 @@
   </div>
 
   <script>
-    // Твой токен Hugging Face
-    const HF_API_TOKEN = "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";
-
     let currentAiData = null;
     let currentTone = 'brief';
 
@@ -358,59 +355,50 @@
     const resultsArea = document.getElementById('results-area');
     const filterChips = document.querySelectorAll('.filter-chip');
 
-    async function fetchFromHuggingFace(word) {
-      // Обновленный эндпоинт Router API
-      const url = "https://router.huggingface.co/hf-inference/v1/chat/completions";
+    async function fetchAiData(word) {
+      const url = "https://text.pollinations.ai/";
 
-      const systemPrompt = `Ты сервер приложения "ЧистоСлов". Объясни слово "${word}" и подбери к нему альтернативы/синонимы.
-Верни ответ СТРОГО в формате валидного JSON без какого-либо другого текста, вступительных фраз или markdown тегов (без \`\`\`json):
+      const systemPrompt = `Ты сервер приложения "ЧистоСлов". Твоя задача — разбрать слово "${word}".
+Верни ответ СТРОГО в формате чистого JSON без оформления markdown, без тройных кавычек (\`\`\`json) и без постороннего текста:
 {
   "correctedWord": "${word}",
   "badgeText": "🟡 Разговорное",
   "badgeClass": "badge-yellow",
   "brief": ["синоним 1", "синоним 2"],
-  "friends": ["разговорный 1", "разговорный 2"],
-  "work": ["деловой 1", "деловой 2"],
-  "witty": ["ироничный 1", "ироничный 2"],
-  "context": "краткое значение и контекст",
+  "friends": ["простое слово 1", "простое слово 2"],
+  "work": ["деловое слово 1", "деловое слово 2"],
+  "witty": ["ироничное слово 1", "ироничное слово 2"],
+  "context": "краткое значение слова",
   "usage": "где уместно использовать",
-  "factTitle": "Этимология",
-  "factBody": "краткий интересный факт о слове"
+  "factTitle": "Происхождение",
+  "factBody": "краткий интересный факт"
 }`;
 
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${HF_API_TOKEN}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "Qwen/Qwen2.5-7B-Instruct",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: `Слово: ${word}` }
+            { role: "user", content: `Разбери слово: ${word}` }
           ],
-          max_tokens: 500,
-          temperature: 0.2
+          model: "openai",
+          jsonMode: true
         })
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("HF Error:", errorText);
-        throw new Error("Ошибка запроса к Hugging Face: " + response.status);
+        throw new Error("Ошибка сервиса AI: " + response.status);
       }
 
-      const result = await response.json();
-      let generatedText = result.choices[0].message.content.trim();
-
-      // Очищаем от возможной разметки markdown ```json ... ```
-      generatedText = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const textResponse = await response.text();
       
-      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("Не удалось распарсить JSON из ответа нейросети");
-
-      return JSON.parse(jsonMatch[0]);
+      // Очистка от возможных символов разметки
+      const cleanJsonText = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      return JSON.parse(cleanJsonText);
     }
 
     async function handleSearch() {
@@ -422,11 +410,11 @@
       searchBtn.disabled = true;
 
       try {
-        currentAiData = await fetchFromHuggingFace(query);
+        currentAiData = await fetchAiData(query);
         renderResults();
       } catch (err) {
-        alert("Не удалось обработать запрос. Попробуйте еще раз.");
         console.error(err);
+        alert("Произошла ошибка при запросе к нейросети. Попробуйте еще раз.");
       } finally {
         loader.style.display = 'none';
         searchBtn.disabled = false;
@@ -437,7 +425,7 @@
       if (!currentAiData) return;
 
       document.getElementById('res-badge').className = `badge ${currentAiData.badgeClass || 'badge-yellow'}`;
-      document.getElementById('res-badge').textContent = currentAiData.badgeText;
+      document.getElementById('res-badge').textContent = currentAiData.badgeText || '🟡 Разговорное';
 
       const synonyms = currentAiData[currentTone] || currentAiData.brief || [];
       const synonymsList = document.getElementById('synonyms-list');
