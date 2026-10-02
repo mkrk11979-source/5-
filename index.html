@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЧистоСлов — Экспресс-замена слов (AI Powered)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-border: #334155;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-light: rgba(99, 102, 241, 0.15);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 4px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .wod-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(49, 46, 129, 0.4) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .wod-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #a5b4fc;
+      margin-bottom: 6px;
+    }
+
+    .wod-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .wod-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .submit-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 0 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .filters-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .filter-chip {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .filter-chip.active {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .results-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge-yellow { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    .synonyms-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .synonym-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .synonym-text {
+      font-weight: 600;
+      font-size: 0.98rem;
+      color: #fff;
+    }
+
+    .mini-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      font-size: 1.1rem;
+    }
+
+    .info-block {
+      border-top: 1px solid var(--card-border);
+      padding-top: 12px;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .info-block strong { color: var(--text); }
+
+    .fact-card {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px dashed var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .fact-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .fact-title {
+      font-weight: 700;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .fact-body {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">ЧС</div>
+        <span>ЧистоСлов AI</span>
+      </div>
+    </header>
+
+    <div class="card wod-card">
+      <div class="wod-tag">💡 Слово дня</div>
+      <div class="wod-title">Эвфемизм</div>
+      <div class="wod-desc">Нейтральное слово, используемое вместо резких, грубых или неприличных фраз.</div>
+    </div>
+
+    <div class="search-box">
+      <div class="input-wrapper">
+        <input type="text" class="search-input" id="search-input" placeholder="Введите любое слово..." autocomplete="off">
+      </div>
+      <button class="submit-btn" id="search-btn">Найти</button>
+    </div>
+
+    <div class="filters-scroll">
+      <button class="filter-chip active" data-tone="brief">⚡ В двух словах</button>
+      <button class="filter-chip" data-tone="friends">💬 Разговорный</button>
+      <button class="filter-chip" data-tone="work">💼 Для работы</button>
+      <button class="filter-chip" data-tone="witty">🎭 Ироничный</button>
+    </div>
+
+    <div class="loader" id="loader">✨ Нейросеть генерирует подборку...</div>
+
+    <div class="results-container" id="results-area" style="display: none;">
+      <div class="card">
+        <div class="result-header">
+          <span class="badge badge-yellow" id="res-badge">🟡 Разговорный стиль</span>
+        </div>
+
+        <div class="synonyms-list" id="synonyms-list"></div>
+
+        <div class="info-block">
+          <div id="res-context"><strong>Контекст:</strong> ...</div>
+          <div id="res-usage"><strong>Где уместно:</strong> ...</div>
+        </div>
+      </div>
+
+      <div class="fact-card">
+        <div class="fact-header">✨ Справка / Этимология</div>
+        <div class="fact-title" id="fact-title">...</div>
+        <div class="fact-body" id="fact-body">...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Твой токен Hugging Face
+    const HF_API_TOKEN = "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";
+
+    let currentAiData = null;
+    let currentTone = 'brief';
+
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const loader = document.getElementById('loader');
+    const resultsArea = document.getElementById('results-area');
+    const filterChips = document.querySelectorAll('.filter-chip');
+
+    async function fetchFromHuggingFace(word) {
+      // Обновленный эндпоинт Router API
+      const url = "https://router.huggingface.co/hf-inference/v1/chat/completions";
+
+      const systemPrompt = `Ты сервер приложения "ЧистоСлов". Объясни слово "${word}" и подбери к нему альтернативы/синонимы.
+Верни ответ СТРОГО в формате валидного JSON без какого-либо другого текста, вступительных фраз или markdown тегов (без \`\`\`json):
+{
+  "correctedWord": "${word}",
+  "badgeText": "🟡 Разговорное",
+  "badgeClass": "badge-yellow",
+  "brief": ["синоним 1", "синоним 2"],
+  "friends": ["разговорный 1", "разговорный 2"],
+  "work": ["деловой 1", "деловой 2"],
+  "witty": ["ироничный 1", "ироничный 2"],
+  "context": "краткое значение и контекст",
+  "usage": "где уместно использовать",
+  "factTitle": "Этимология",
+  "factBody": "краткий интересный факт о слове"
+}`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${HF_API_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "Qwen/Qwen2.5-7B-Instruct",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Слово: ${word}` }
+          ],
+          max_tokens: 500,
+          temperature: 0.2
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("HF Error:", errorText);
+        throw new Error("Ошибка запроса к Hugging Face: " + response.status);
+      }
+
+      const result = await response.json();
+      let generatedText = result.choices[0].message.content.trim();
+
+      // Очищаем от возможной разметки markdown ```json ... ```
+      generatedText = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Не удалось распарсить JSON из ответа нейросети");
+
+      return JSON.parse(jsonMatch[0]);
+    }
+
+    async function handleSearch() {
+      const query = searchInput.value.trim();
+      if (!query) return;
+
+      loader.style.display = 'block';
+      resultsArea.style.display = 'none';
+      searchBtn.disabled = true;
+
+      try {
+        currentAiData = await fetchFromHuggingFace(query);
+        renderResults();
+      } catch (err) {
+        alert("Не удалось обработать запрос. Попробуйте еще раз.");
+        console.error(err);
+      } finally {
+        loader.style.display = 'none';
+        searchBtn.disabled = false;
+      }
+    }
+
+    function renderResults() {
+      if (!currentAiData) return;
+
+      document.getElementById('res-badge').className = `badge ${currentAiData.badgeClass || 'badge-yellow'}`;
+      document.getElementById('res-badge').textContent = currentAiData.badgeText;
+
+      const synonyms = currentAiData[currentTone] || currentAiData.brief || [];
+      const synonymsList = document.getElementById('synonyms-list');
+      synonymsList.innerHTML = '';
+
+      synonyms.forEach(syn => {
+        const item = document.createElement('div');
+        item.className = 'synonym-item';
+        item.innerHTML = `
+          <span class="synonym-text">${syn}</span>
+          <button class="mini-btn" onclick="navigator.clipboard.writeText('${syn}'); alert('Скопировано!')" title="Скопировать">📋</button>
+        `;
+        synonymsList.appendChild(item);
+      });
+
+      document.getElementById('res-context').innerHTML = `<strong>Контекст:</strong> ${currentAiData.context || ''}`;
+      document.getElementById('res-usage').innerHTML = `<strong>Где уместно:</strong> ${currentAiData.usage || ''}`;
+      document.getElementById('fact-title').textContent = `${(currentAiData.correctedWord || '').toUpperCase()} — ${currentAiData.factTitle || 'Справка'}`;
+      document.getElementById('fact-body').textContent = currentAiData.factBody || '';
+
+      resultsArea.style.display = 'flex';
+    }
+
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        filterChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentTone = chip.dataset.tone;
+        if (currentAiData) renderResults();
+      });
+    });
+
+    searchBtn.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+  </script>
+</body>
+</html>
