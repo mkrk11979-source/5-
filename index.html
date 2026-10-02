@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ЧистоСлов — Экспресс-замена слов (AI Powered)</title>
+  <title>ЧистоСлов — Перевод из грубого в литературный</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,6 @@
       --text-muted: #94a3b8;
       --success: #10b981;
       --warning: #f59e0b;
-      --danger: #ef4444;
       --radius: 16px;
     }
 
@@ -42,7 +41,7 @@
 
     .app-container {
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -85,12 +84,12 @@
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
-    .wod-card {
+    .promo-card {
       background: linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(49, 46, 129, 0.4) 100%);
       border: 1px solid rgba(99, 102, 241, 0.3);
     }
 
-    .wod-tag {
+    .promo-tag {
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -99,14 +98,14 @@
       margin-bottom: 6px;
     }
 
-    .wod-title {
-      font-size: 1.25rem;
+    .promo-title {
+      font-size: 1.15rem;
       font-weight: 700;
       margin-bottom: 4px;
       color: #fff;
     }
 
-    .wod-desc {
+    .promo-desc {
       font-size: 0.85rem;
       color: var(--text-muted);
       line-height: 1.4;
@@ -143,44 +142,23 @@
       color: #fff;
       border: none;
       border-radius: 14px;
-      padding: 0 18px;
+      padding: 0 20px;
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: var(--accent-hover);
     }
 
     .submit-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-    }
-
-    .filters-scroll {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-
-    .filter-chip {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .filter-chip.active {
-      background: var(--accent-light);
-      border-color: var(--accent);
-      color: #fff;
-      font-weight: 500;
     }
 
     .results-container {
@@ -189,47 +167,66 @@
       gap: 16px;
     }
 
-    .result-header {
+    .word-header {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .badge-yellow { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-    .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-
-    .synonyms-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
       margin-bottom: 16px;
     }
 
-    .synonym-item {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 10px 14px;
+    .target-word {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: capitalize;
+    }
+
+    .situations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .situation-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .situation-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .phrases-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .phrase-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
 
-    .synonym-text {
-      font-weight: 600;
-      font-size: 0.98rem;
-      color: #fff;
+    .phrase-text {
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      line-height: 1.3;
     }
 
     .mini-btn {
@@ -237,22 +234,15 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 6px;
-      font-size: 1.1rem;
+      padding: 4px;
+      font-size: 1rem;
+      border-radius: 6px;
+      transition: color 0.2s;
     }
 
-    .info-block {
-      border-top: 1px solid var(--card-border);
-      padding-top: 12px;
-      margin-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
+    .mini-btn:hover {
+      color: #fff;
     }
-
-    .info-block strong { color: var(--text); }
 
     .fact-card {
       background: rgba(99, 102, 241, 0.08);
@@ -269,23 +259,16 @@
       margin-bottom: 6px;
     }
 
-    .fact-title {
-      font-weight: 700;
-      color: #fff;
-      font-size: 1rem;
-    }
-
     .fact-body {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--text-muted);
-      margin-top: 4px;
       line-height: 1.4;
     }
 
     .loader {
       display: none;
       text-align: center;
-      padding: 20px;
+      padding: 24px;
       color: var(--accent);
       font-weight: 600;
     }
@@ -301,84 +284,75 @@
       </div>
     </header>
 
-    <div class="card wod-card">
-      <div class="wod-tag">💡 Слово дня</div>
-      <div class="wod-title">Эвфемизм</div>
-      <div class="wod-desc">Нейтральное слово, используемое вместо резких, грубых или неприличных фраз.</div>
+    <div class="card promo-card">
+      <div class="promo-tag">🌿 Чистая речь</div>
+      <div class="promo-title">Окультуривай свой лексикон</div>
+      <div class="promo-desc">Введи любое ругательство или разговорное слово — AI подберет красивую литературную замену под каждую ситуацию.</div>
     </div>
 
     <div class="search-box">
       <div class="input-wrapper">
-        <input type="text" class="search-input" id="search-input" placeholder="Введите любое слово..." autocomplete="off">
+        <input type="text" class="search-input" id="search-input" placeholder="Введите ругательство или разговорное слово..." autocomplete="off">
       </div>
-      <button class="submit-btn" id="search-btn">Найти</button>
+      <button class="submit-btn" id="search-btn">Очистить</button>
     </div>
 
-    <div class="filters-scroll">
-      <button class="filter-chip active" data-tone="brief">⚡ В двух словах</button>
-      <button class="filter-chip" data-tone="friends">💬 Разговорный</button>
-      <button class="filter-chip" data-tone="work">💼 Для работы</button>
-      <button class="filter-chip" data-tone="witty">🎭 Ироничный</button>
-    </div>
-
-    <div class="loader" id="loader">✨ Нейросеть генерирует подборку...</div>
+    <div class="loader" id="loader">✨ Подбираем ситуации и литературные выражения...</div>
 
     <div class="results-container" id="results-area" style="display: none;">
       <div class="card">
-        <div class="result-header">
-          <span class="badge badge-yellow" id="res-badge">🟡 Разговорный стиль</span>
+        <div class="word-header">
+          <span class="target-word" id="target-word-title">Слово</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Литературные замены:</span>
         </div>
 
-        <div class="synonyms-list" id="synonyms-list"></div>
-
-        <div class="info-block">
-          <div id="res-context"><strong>Контекст:</strong> ...</div>
-          <div id="res-usage"><strong>Где уместно:</strong> ...</div>
-        </div>
+        <div class="situations-list" id="situations-list"></div>
       </div>
 
       <div class="fact-card">
-        <div class="fact-header">✨ Справка / Этимология</div>
-        <div class="fact-title" id="fact-title">...</div>
-        <div class="fact-body" id="fact-body">...</div>
+        <div class="fact-header">💡 Совет по культуре речи</div>
+        <div class="fact-body" id="advice-body">...</div>
       </div>
     </div>
   </div>
 
   <script>
-    let currentAiData = null;
-    let currentTone = 'brief';
-
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
     const loader = document.getElementById('loader');
     const resultsArea = document.getElementById('results-area');
-    const filterChips = document.querySelectorAll('.filter-chip');
+    const situationsList = document.getElementById('situations-list');
+    const targetWordTitle = document.getElementById('target-word-title');
+    const adviceBody = document.getElementById('advice-body');
 
     async function fetchAiData(word) {
       const url = "https://text.pollinations.ai/";
 
-      const systemPrompt = `Ты сервер приложения "ЧистоСлов". Твоя задача — разбрать слово "${word}".
-Верни ответ СТРОГО в формате чистого JSON без оформления markdown, без тройных кавычек (\`\`\`json) и без постороннего текста:
+      const systemPrompt = `Ты эксперт по культуре речи и стилистике русского языка в приложении "ЧистоСлов".
+Твоя задача: взять грубое, разговорное или матерное слово/выражение "${word}" и подобрать к нему ЛИТЕРАТУРНЫЕ замены, разделенные ПО РАЗНЫМ ТИПОВЫМ СИТУАЦИЯМ его применения.
+
+Определи все самые актуальные и распространенные ситуации, где это слово используется (например: "О качестве предметов/услуг", "О лжи или дезинформации", "О беспорядке", "О выражении досады" и т.д.).
+Для каждой ситуации предложи от 2 до 4 литературных фраз, оборотов или точных синонимов, которыми можно заменить это грубое слово.
+
+Верни ответ СТРОГО в формате валидного JSON без разметки markdown, без \`\`\`json и без любого вводного текста:
 {
-  "correctedWord": "${word}",
-  "badgeText": "🟡 Разговорное",
-  "badgeClass": "badge-yellow",
-  "brief": ["синоним 1", "синоним 2"],
-  "friends": ["простое слово 1", "простое слово 2"],
-  "work": ["деловое слово 1", "деловое слово 2"],
-  "witty": ["ироничное слово 1", "ироничное слово 2"],
-  "context": "краткое значение слова",
-  "usage": "где уместно использовать",
-  "factTitle": "Происхождение",
-  "factBody": "краткий интересный факт"
+  "word": "${word}",
+  "advice": "Короткий стилистический совет, почему лучше отказаться от этого слова или чем заменить его эмоцию",
+  "situations": [
+    {
+      "contextName": "Название ситуационного контекста (например: Если речь идет о качестве вещей)",
+      "replacements": ["некачественная вещь", "низкопробный товар", "полный брак"]
+    },
+    {
+      "contextName": "Название ситуационного контекста (например: Если речь идет о неправде)",
+      "replacements": ["говорить небылицы", "вводить в заблуждение", "недостоверная информация"]
+    }
+  ]
 }`;
 
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
             { role: "system", content: systemPrompt },
@@ -390,14 +364,11 @@
       });
 
       if (!response.ok) {
-        throw new Error("Ошибка сервиса AI: " + response.status);
+        throw new Error("Ошибка API: " + response.status);
       }
 
       const textResponse = await response.text();
-      
-      // Очистка от возможных символов разметки
       const cleanJsonText = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-      
       return JSON.parse(cleanJsonText);
     }
 
@@ -410,53 +381,54 @@
       searchBtn.disabled = true;
 
       try {
-        currentAiData = await fetchAiData(query);
-        renderResults();
+        const data = await fetchAiData(query);
+        renderResults(data);
       } catch (err) {
         console.error(err);
-        alert("Произошла ошибка при запросе к нейросети. Попробуйте еще раз.");
+        alert("Произошла ошибка при обработке слова. Попробуйте еще раз.");
       } finally {
         loader.style.display = 'none';
         searchBtn.disabled = false;
       }
     }
 
-    function renderResults() {
-      if (!currentAiData) return;
+    function renderResults(data) {
+      targetWordTitle.textContent = data.word;
+      adviceBody.textContent = data.advice || "Замена грубой лексики на точные литературные выражении делает вашу речь более убедительной и авторитетной.";
 
-      document.getElementById('res-badge').className = `badge ${currentAiData.badgeClass || 'badge-yellow'}`;
-      document.getElementById('res-badge').textContent = currentAiData.badgeText || '🟡 Разговорное';
+      situationsList.innerHTML = '';
 
-      const synonyms = currentAiData[currentTone] || currentAiData.brief || [];
-      const synonymsList = document.getElementById('synonyms-list');
-      synonymsList.innerHTML = '';
+      if (data.situations && data.situations.length > 0) {
+        data.situations.forEach(sit => {
+          const sitCard = document.createElement('div');
+          sitCard.className = 'situation-card';
 
-      synonyms.forEach(syn => {
-        const item = document.createElement('div');
-        item.className = 'synonym-item';
-        item.innerHTML = `
-          <span class="synonym-text">${syn}</span>
-          <button class="mini-btn" onclick="navigator.clipboard.writeText('${syn}'); alert('Скопировано!')" title="Скопировать">📋</button>
-        `;
-        synonymsList.appendChild(item);
-      });
+          let phrasesHtml = '';
+          sit.replacements.forEach(phrase => {
+            phrasesHtml += `
+              <div class="phrase-item">
+                <span class="phrase-text">${phrase}</span>
+                <button class="mini-btn" onclick="copyText('${phrase}')" title="Скопировать">📋</button>
+              </div>
+            `;
+          });
 
-      document.getElementById('res-context').innerHTML = `<strong>Контекст:</strong> ${currentAiData.context || ''}`;
-      document.getElementById('res-usage').innerHTML = `<strong>Где уместно:</strong> ${currentAiData.usage || ''}`;
-      document.getElementById('fact-title').textContent = `${(currentAiData.correctedWord || '').toUpperCase()} — ${currentAiData.factTitle || 'Справка'}`;
-      document.getElementById('fact-body').textContent = currentAiData.factBody || '';
+          sitCard.innerHTML = `
+            <div class="situation-title">📌 ${sit.contextName}</div>
+            <div class="phrases-list">${phrasesHtml}</div>
+          `;
+
+          situationsList.appendChild(sitCard);
+        });
+      }
 
       resultsArea.style.display = 'flex';
     }
 
-    filterChips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        filterChips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        currentTone = chip.dataset.tone;
-        if (currentAiData) renderResults();
-      });
-    });
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      alert(`Скопировано: "${text}"`);
+    }
 
     searchBtn.addEventListener('click', handleSearch);
     searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
